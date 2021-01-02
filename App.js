@@ -1,19 +1,20 @@
 import React, { Component } from 'react';
-import { View, Text,TouchableOpacity,StyleSheet,Image,ActivityIndicator} from 'react-native';
+import { View, Text,TouchableOpacity,StyleSheet,Image,ActivityIndicator,SafeAreaView} from 'react-native';
 import SoundPlayer from 'react-native-sound-player'
 export default class App extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      baslat:'false',
+    };
 
   }
 
-  state = {
-    baslat:false,
-  };
+ 
 
   playSong() {
     try {
-      SoundPlayer.playUrl('http://centauri.shoutca.st:9039/;stream.mp3')
+      SoundPlayer.playUrl('https://17703.live.streamtheworld.com/JOY_TURK2.mp3')
     } catch (e) {
       alert('Cannot play the file')
       console.log('cannot play the song file', e)
@@ -33,26 +34,55 @@ export default class App extends Component {
     this.playSong()
     this.getInfo()
     this.setState({
-      baslat:true
+      baslat:'true'
     })
   }
 
   onPressDurdur() {
     SoundPlayer.stop()
     this.getInfo()
-    this.setState({
-      baslat:false
+    this.setState({ baslat: 'false'}, function() {
+      // do something with new state
+  });
+    console.log(this.state.baslat)
+  }
+
+  _onFinishedPlayingSubscription = null
+  _onFinishedLoadingSubscription = null
+  _onFinishedLoadingFileSubscription = null
+  _onFinishedLoadingURLSubscription = null
+
+  componentDidMount() {
+    _onFinishedPlayingSubscription = SoundPlayer.addEventListener('FinishedPlaying', ({ success }) => {
+      console.log('finished playing', success)
     })
+    _onFinishedLoadingSubscription = SoundPlayer.addEventListener('FinishedLoading', ({ success }) => {
+      console.log('finished loading', success)
+    })
+    _onFinishedLoadingFileSubscription = SoundPlayer.addEventListener('FinishedLoadingFile', ({ success, name, type }) => {
+      console.log('finished loading file', success, name, type)
+    })
+    _onFinishedLoadingURLSubscription = SoundPlayer.addEventListener('FinishedLoadingURL', ({ success, url }) => {
+      console.log('finished loading url', success, url)
+    })
+  }
+ 
+  // Remove all the subscriptions when component will unmount
+  componentWillUnmount() {
+    _onFinishedPlayingSubscription.remove()
+    _onFinishedLoadingSubscription.remove()
+    _onFinishedLoadingURLSubscription.remove()
+    _onFinishedLoadingFileSubscription.remove()
   }
 
   render() {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <View>
           {
-            this.state.baslat == true ?
-            (<Image source={require("./unnamed.gif")} style={styles.logo} resizeMode={"contain"} />  ):
-            (<Image source={require("./sesyok.png")} style={styles.logo} resizeMode={"contain"} />)
+            this.state.baslat == 'true' ?
+            (<Image source={require("./unnamed.gif")} style={styles.logo} />  ):
+            (<Image source={require("./sesyok.png")} style={styles.logo} />)
           }
            
         </View>
@@ -65,7 +95,7 @@ export default class App extends Component {
             </TouchableOpacity>
        </View>
        
-      </View>
+      </SafeAreaView>
     );
   }
 }
